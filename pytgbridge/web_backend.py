@@ -13,7 +13,10 @@ import subprocess
 
 def http_server_thread(host, port, wwwpath):
 	os.chdir(wwwpath)
-	serv = socketserver.TCPServer((host, port), http.server.SimpleHTTPRequestHandler)
+	handler = http.server.SimpleHTTPRequestHandler
+	handler.timeout = 30 # a stalled client would otherwise block its handler forever
+	serv = socketserver.ThreadingTCPServer((host, port), handler)
+	serv.daemon_threads = True
 	logging.info("Built-in HTTP server listening on %s:%d, dir: %s", host, port, wwwpath)
 	serv.serve_forever()
 
